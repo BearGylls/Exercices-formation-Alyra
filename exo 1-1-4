@@ -1,0 +1,21 @@
+class Cercle {
+	constructor(rayon){
+		this.rayon = rayon;
+	}
+	
+	aire() {
+		return 2*this.rayon*Math.PI;
+	}
+	
+	perimetre() {
+		return Math.PI*Math.pow(this.rayon,2);
+	}
+}
+
+C1 = new Cercle(4);
+C2 = new Cercle(6);
+console.log("Le cercle de rayon ",C1.rayon," a une aire de ",C1.aire()," cm");
+console.log("Le cercle de rayon ",C1.rayon," a un perimetre de ",C1.perimetre());
+
+console.log("Le cercle de rayon ",C2.rayon," a une aire de ",C2.aire()," cm");
+console.log("Le cercle de rayon ",C2.rayon," a un perimetre de ",C2.perimetre());
