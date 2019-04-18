@@ -1,0 +1,16 @@
+IP =["153.8.223.72","169.38.84.49","169.46.49.112","184.173.213.155","159.122.100.41","119.81.134.212","5.10.5.200","158.176.81.249","168.1.168.251","169.57.7.230","159.122.142.111","159.8.78.42","192.155.217.197","169.57.163.228","169.56.184.72","50.87.60.166"];
+Villes = ["Amsterdam","Chennai","Dallas","Dallas, TX, USA","Frankfurt","Hong Kong","London","London","Melbourne","Mexico City","Milan","Paris","San Jose","São Paulo","Toronto","Washington DC"];
+Hash = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+
+for(i=0;i<Villes.length;i++) {
+
+    IP[i]= IP[i].split(".");
+    for(j=0;j<IP[i].length;j++) {
+        Hash[i] *= Villes[i][j].charCodeAt() * IP[i][j];       
+    }  
+    Hash[i] = Hash[i].toString().slice(0, 8);
+}
+
+for(i=0;i<Hash.length;i++) {
+    console.log("Le hash qui identifie le serveur situé dans la ville", Villes[i], " est : ",Hash[i]);
+}
