@@ -38,11 +38,11 @@ contract CagnotteFestival is Cogere {
       }
     
     
-    function payer(address payable _destinataire, uint _montant) public {
+    function payer(address payable _destinataire) public payable {
         require(estOrga(msg.sender));
         require(_destinataire != address(0));
-        require(_montant > 0);
-        _destinataire.transfer(_montant);
+        require(msg.value > 0);
+        _destinataire.transfer(msg.value);
       }
 
     function sponsoriser(string memory _nom) public payable {
