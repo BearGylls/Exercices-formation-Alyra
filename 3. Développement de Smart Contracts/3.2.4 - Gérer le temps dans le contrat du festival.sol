@@ -63,10 +63,12 @@ library SafeMath {
 contract Cogere{
     mapping (address => uint) organisateurs;
     mapping (address => bool) isOrga;
-   
+    uint public nbOrgas;
+       
     constructor() public payable {
       organisateurs[msg.sender] = 100;
       isOrga[msg.sender]=true;
+      nbOrgas =1;
     }
    
     function transfererOrga(address _orga, uint _parts) public {
@@ -74,6 +76,7 @@ contract Cogere{
         organisateurs[msg.sender] -= _parts;
         organisateurs[_orga] += _parts;
         isOrga[_orga]=true;
+        nbOrgas++;
      }
     
      function estOrga(address _orga) public view returns (bool){ 
@@ -86,11 +89,13 @@ contract CagnotteFestival is Cogere {
     string[] sponsors;
     uint placesRestantes = 500;
     mapping (address => bool) festivaliers;
-    uint seuilDepenseJour=200;
-    uint depenseDuJour;
+    uint seuilDepenseJour=200 * 1 finney;
+    uint depensesDuJour;
     uint dateJour= now;
     uint dateFestival = 52*49 weeks + 27 weeks;
     uint dateLiquidation = dateFestival + 2 weeks;
+    bool selfdestructed = false;
+
 
     using SafeMath for uint256;
 
@@ -99,6 +104,7 @@ contract CagnotteFestival is Cogere {
     }    
 
     function acheterTicket() public payable returns (int) {
+        require(!selfdestructed);
         require(msg.value>= 500 finney,"Place à 0.5 Ethers");
         require(placesRestantes>0,"Plus de places !");
         festivaliers[msg.sender]=true;
@@ -106,34 +112,40 @@ contract CagnotteFestival is Cogere {
         return int(placesRestantes);
     }
     
-    function payer(address payable _destinataire) public {
+    function payer(address payable _destinataire) public payable {
+        require(!selfdestructed);        
         require(estOrga(msg.sender));
         require(_destinataire != address(0));
         require(msg.value > 0);
         require(controleDepenses(msg.value),"Le montant journalier est dejà dépassé");
+        depensesDuJour += msg.value;
         _destinataire.transfer(msg.value);
       }
 
     function sponsoriser(string memory _nom) public payable {
+        require(!selfdestructed);
         require(msg.value >= 30 ether);
         sponsors.push(_nom);
     }
 
     function controleDepenses(uint _montant) internal view returns (bool){
-        require(depenseDuJour.add(_montant) <= seuilDepenseJour);
-        depenseDuJour.add(_montant);
+        require(depensesDuJour.add(_montant) <= seuilDepenseJour);
+        depensesDuJour.add(_montant);
 
         return true;
     }
 
-    function retraitOrga() private {
+    function retraitOrga() public payable {
+        require(!selfdestructed);
         require(estOrga(msg.sender));
         require(block.timestamp >= dateLiquidation);
-        msg.sender.transfer(address(this).balance.mul(organisateurs[msg.sender]/100));
         organisateurs[msg.sender]=0;
         isOrga[msg.sender]=false;
-        if(address(this).balance == 0){
-            selfdestruct(msg.sender);             
+        nbOrgas--;        
+        msg.sender.transfer(address(this).balance.mul(organisateurs[msg.sender]/100));
+        if(nbOrgas == 0){
+            selfdestruct(msg.sender);
+            selfdestructed =true;
         }
     }
 }
